@@ -4,7 +4,8 @@ This extension adds `python 2.7` support to [JsMacros](https://github.com/wagyou
 
 # issues/notes
 
-jython doesn't auto-coerce functions to consumers, so use the extra library `consumer`
+* use `jython.py` as the end of the file name if `JEP` is also installed to run using `Jython` instead of `JEP`.
+* jython doesn't auto-coerce functions to consumers, so use the extra library `consumer`
 
 ## 1.0.2+
 
