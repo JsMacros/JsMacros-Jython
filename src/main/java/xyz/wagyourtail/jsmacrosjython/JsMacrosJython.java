@@ -11,7 +11,7 @@ import xyz.wagyourtail.jsmacros.runscript.RunScript;
 import xyz.wagyourtail.jsmacros.runscript.functions.Functions;
 
 public class JsMacrosJython implements ClientModInitializer {
-    public boolean hasJEP = false;
+    public static boolean hasJEP = false;
     
     @Override
     public void onInitializeClient() {
