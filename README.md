@@ -1,9 +1,15 @@
-# Fabric Example Mod
+# JsMacros-JEP
 
-## Setup
+This extension adds `python 2.7` support to [JsMacros](https://github.com/wagyourtail/JsMacros) `1.2.3+`
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+# issues/notes
 
-## License
+consumers aren't automatically created from py functions so use:
+```python 
+from java.util.function import Consumer
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+class jc(Consumer):
+    def __init__(self, fn):
+        self.accept=fn
+```
+same thing for BiConsumers basically.
