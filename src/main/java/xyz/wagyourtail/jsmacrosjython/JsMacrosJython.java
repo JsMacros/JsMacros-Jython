@@ -9,9 +9,11 @@ import net.fabricmc.api.ClientModInitializer;
 import xyz.wagyourtail.jsmacros.config.RawMacro;
 import xyz.wagyourtail.jsmacros.runscript.RunScript;
 import xyz.wagyourtail.jsmacros.runscript.functions.Functions;
+import xyz.wagyourtail.jsmacrosjython.functions.consumerFunctions;
 
 public class JsMacrosJython implements ClientModInitializer {
     public static boolean hasJEP = false;
+    private static Functions consumerFix = new consumerFunctions("consumer");
     
     @Override
     public void onInitializeClient() {
@@ -37,6 +39,7 @@ public class JsMacrosJython implements ClientModInitializer {
                             interp.set(f.libName, f);
                         }
                     }
+                    interp.set(consumerFix.libName, consumerFix);
 
                     interp.exec("import os\nos.chdir('"
                         + file.getParentFile().getCanonicalPath().replaceAll("\\\\", "/") + "')");
