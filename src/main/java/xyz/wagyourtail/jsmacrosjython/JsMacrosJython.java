@@ -1,6 +1,7 @@
 package xyz.wagyourtail.jsmacrosjython;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.python.util.PythonInterpreter;
@@ -13,7 +14,6 @@ import xyz.wagyourtail.jsmacrosjython.functions.consumerFunctions;
 
 public class JsMacrosJython implements ClientModInitializer {
     public static boolean hasJEP = false;
-    private static Functions consumerFix = new consumerFunctions("consumer");
     
     @Override
     public void onInitializeClient() {
@@ -26,6 +26,7 @@ public class JsMacrosJython implements ClientModInitializer {
         
         // register language
         RunScript.addLanguage(new RunScript.Language() {
+            private Functions consumerFix = new consumerFunctions("consumer");
 
             @Override
             public void exec(RawMacro macro, File file, String event, Map<String, Object> args) throws Exception {
@@ -49,12 +50,32 @@ public class JsMacrosJython implements ClientModInitializer {
                 }
             }
 
-
+            @Override
+            public void exec(String script, Map<String, Object> globals, Path path) throws Exception {
+                try (PythonInterpreter interp = new PythonInterpreter()) {
+                    
+                    for (Functions f : RunScript.standardLib) {
+                        if (!f.excludeLanguages.contains("jython.py")) {
+                            interp.set(f.libName, f);
+                        }
+                    }
+                    interp.set(consumerFix.libName, consumerFix);
+                    
+                    if (globals != null) for (Map.Entry<String, Object> e : globals.entrySet()) {
+                        interp.set(e.getKey(), e.getValue());
+                    }
+                    
+                    interp.exec(script);
+                } catch (Exception e) {
+                    throw e;
+                }
+                
+            }
+            
             @Override
             public String extension() {
                 return hasJEP ? "jython.py" : ".py";
             }
-
         });
 
         RunScript.sortLanguages();
