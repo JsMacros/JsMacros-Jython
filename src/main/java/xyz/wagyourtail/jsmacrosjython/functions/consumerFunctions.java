@@ -20,20 +20,33 @@ public class consumerFunctions extends Functions {
     }
     
     public Consumer<Object> toConsumer(PyFunction c) {
-        return new Consumer<Object>() {
-            @Override
-            public void accept(Object arg0) {
-                c._jcall(new Object[] {arg0});
-            }
+        return (arg0) -> {
+            c._jcall(new Object[] {arg0});
         };
     }
     
     public BiConsumer<Object, Object> toBiConsumer(PyFunction c) {
-        return new BiConsumer<Object, Object>() {
-            @Override
-            public void accept(Object arg0, Object arg1) {
-                c._jcall(new Object[] {arg0, arg1});
-            }
+        return (arg0, arg1) -> {
+            c._jcall(new Object[] {arg0, arg1});
         };
     }
+    
+    public Consumer<Object> toAsyncConsumer(PyFunction c) {
+        return (arg0) -> {
+            Thread t = new Thread(() -> {
+                c._jcall(new Object[] {arg0});
+            });
+            t.start();
+        };
+    }
+    
+    public BiConsumer<Object, Object> toAsyncBiConsumer(PyFunction c) {
+        return (arg0, arg1) -> {
+            Thread t = new Thread(() -> {
+                c._jcall(new Object[] {arg0, arg1});
+            });
+            t.start();
+        };
+    }
+    
 }
