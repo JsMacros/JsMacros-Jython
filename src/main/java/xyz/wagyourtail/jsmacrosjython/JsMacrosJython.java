@@ -7,10 +7,12 @@ import java.util.Map;
 import org.python.util.PythonInterpreter;
 
 import net.fabricmc.api.ClientModInitializer;
+import xyz.wagyourtail.jsmacros.api.sharedinterfaces.IEvent;
 import xyz.wagyourtail.jsmacros.config.RawMacro;
+import xyz.wagyourtail.jsmacros.extensionbase.Functions;
+import xyz.wagyourtail.jsmacros.extensionbase.ILanguage;
 import xyz.wagyourtail.jsmacros.runscript.RunScript;
-import xyz.wagyourtail.jsmacros.runscript.functions.Functions;
-import xyz.wagyourtail.jsmacrosjython.functions.consumerFunctions;
+import xyz.wagyourtail.jsmacrosjython.functions.FConsumerJython;
 
 public class JsMacrosJython implements ClientModInitializer {
     public static boolean hasJEP = false;
@@ -25,14 +27,13 @@ public class JsMacrosJython implements ClientModInitializer {
         }
         
         // register language
-        RunScript.addLanguage(new RunScript.Language() {
-            private Functions consumerFix = new consumerFunctions("consumer");
+        RunScript.addLanguage(new ILanguage() {
+            private Functions consumerFix = new FConsumerJython("consumer");
 
             @Override
-            public void exec(RawMacro macro, File file, String event, Map<String, Object> args) throws Exception {
+            public void exec(RawMacro macro, File file, IEvent event) throws Exception {
                 try (PythonInterpreter interp = new PythonInterpreter()) {
                     interp.set("event", event);
-                    interp.set("args", args);
                     interp.set("file", file);
 
                     for (Functions f : RunScript.standardLib) {
