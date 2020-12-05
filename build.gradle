@@ -39,7 +39,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	
-	modImplementation name: "jsmacros-1.16.4-1.2.8-dev"
+	modImplementation name: "jsmacros-1.16.4-1.2.9-beta-d39b399-dev"
 	
 	//partial fabric api
 	modImplementation "net.fabricmc.fabric-api:fabric-api-base:${project.api_base_version}"
@@ -64,10 +64,11 @@ dependencies {
 	
 	
     //websocket 
-    implementation "org.java-websocket:Java-WebSocket:1.5.1"
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     implementation "com.neovisionaries:nv-websocket-client:2.10"
-    
+
+	implementation "io.noties:prism4j:${prism_version}"
+	include "io.noties:prism4j:${prism_version}"
+
 	//nullable not defined so...
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 	

@@ -9,16 +9,16 @@
     "WagYourTail"
   ],
   "contact": {
-    "homepage": "wagyourtail.xyz"
+    "homepage": "jsmacros.wagyourtail.xyz"
   },
 
   "license": "MIT",
-  "icon": "assets/jsmacrosjython/icon.png",
+  "icon": "assets/jsmacrosjython/logo.png",
 
   "environment": "*",
   "entrypoints": {
     "client": [
-      "xyz.wagyourtail.jsmacrosjython.JsMacrosJython"
+      "xyz.wagyourtail.jsmacros.jython.client.JsMacrosJython"
     ]
   },
   "mixins": [
