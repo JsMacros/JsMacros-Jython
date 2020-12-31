@@ -64,7 +64,6 @@ dependencies {
     implementation "com.neovisionaries:nv-websocket-client:2.10"
 
 	implementation "io.noties:prism4j:${prism_version}"
-	include "io.noties:prism4j:${prism_version}"
 
 	//nullable not defined so...
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
