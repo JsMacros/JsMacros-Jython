@@ -72,7 +72,7 @@ jobs:
       - name: Upload to release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ./build/libs/${{ steps.fname.outputs.result }}.jar application/jar
+          args: ./build/libs/${{ steps.fname.outputs.result }}-all.jar application/jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload to curseforge
