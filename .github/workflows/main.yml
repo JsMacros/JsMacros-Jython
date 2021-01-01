@@ -68,7 +68,7 @@ jobs:
           result-encoding: string
           script: |
             const fs = require("fs")
-            return fs.readdirSync("./build/libs/").filter(e => !e.endsWith("dev.jar") && !e.endsWith("sources.jar") && e.endsWith(".jar"))[0].replace(".jar", "");
+            return fs.readdirSync("./build/libs/").filter(e => !e.endsWith("dev.jar") && !e.endsWith("sources.jar") && !e.endswith("all.jar") && e.endsWith(".jar"))[0].replace(".jar", "");
       - name: Upload to release
         uses: JasonEtco/upload-to-release@master
         with:
