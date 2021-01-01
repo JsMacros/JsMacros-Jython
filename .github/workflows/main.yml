@@ -31,9 +31,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build
-
       - name: Get Js Macros
         uses: benday-inc/download-latest-artifact@main
         with:
@@ -61,6 +58,9 @@ jobs:
             let file = fs.readFileSync("./gradle.properties");
             file = file.toString().split("\n").map(e => e.trim().startsWith("jsmacros_version") ? `${e.split("=")[0]}=${version}` : e).join("\n");
             fs.writeFileSync("./gradle.properties", file)
+
+      - name: Build with Gradle
+        run: ./gradlew build
 
       - uses: actions/github-script@v2
         id: fname
