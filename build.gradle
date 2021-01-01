@@ -74,6 +74,9 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 }
 
+build.finalizedBy(shadowJar)
+
+
 processResources {
 	inputs.property "version", project.version
 
