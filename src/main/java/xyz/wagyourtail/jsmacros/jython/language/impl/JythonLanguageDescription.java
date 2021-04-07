@@ -11,6 +11,7 @@ import xyz.wagyourtail.jsmacros.core.language.BaseWrappedException;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class JythonLanguageDescription extends BaseLanguage {
 
@@ -50,9 +51,24 @@ public class JythonLanguageDescription extends BaseLanguage {
     @Override
     public BaseWrappedException<?> wrapException(Throwable ex) {
         if (ex instanceof PyException) {
-            String message = ((PyType)((PyException) ex).type).fastGetName();
-            if (((PyException) ex).value instanceof PyString) message += " " + ((PyException) ex).value.asString();
-            return new BaseWrappedException<>(ex, message, null, wrapTraceback(((PyException) ex).traceback));
+            String message = ((PyType) ((PyException) ex).type).fastGetName().replace("exceptions.", "");
+            if (ex instanceof PySyntaxError) {
+                PyTuple exceptionData = (PyTuple) ((PySyntaxError) ex).value;
+                message += ": " + exceptionData.get(0);
+                PyTuple locationData = (PyTuple) exceptionData.get(1);
+                String fileName = (String) locationData.get(0);
+                int line = (int) locationData.get(1);
+                int col = (int) locationData.get(2);
+                BaseWrappedException.SourceLocation loc = new BaseWrappedException.GuestLocation(new File(fileName), -1, -1, line, col);
+                return new BaseWrappedException<>(ex, message, loc, ((PyException) ex).traceback != null ? wrapTraceback(((PyException) ex).traceback) : null);
+            } else {
+                if (((PyException) ex).value instanceof PyString) message += ": " + ((PyException) ex).value.asString();
+                else if (ex.getCause() != null) {
+                    String intMessage = ex.getCause().getMessage();
+                    if (intMessage != null) message += ": " + intMessage;
+                }
+                return new BaseWrappedException<>(ex, message, null, ((PyException) ex).traceback != null ? wrapTraceback(((PyException) ex).traceback) : null);
+            }
         }
         return null;
     }
