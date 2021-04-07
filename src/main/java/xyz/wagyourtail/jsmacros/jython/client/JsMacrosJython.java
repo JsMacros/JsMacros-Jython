@@ -13,6 +13,7 @@ public class JsMacrosJython implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         hasJEP = FabricLoader.getInstance().isModLoaded("jsmacros-jep");
+        
         JsMacros.core.addLanguage(new JythonLanguageDescription(hasJEP ? "jython.py" : ".py", JsMacros.core));
         JsMacros.core.sortLanguages();
         JsMacros.core.libraryRegistry.addLibrary(FConsumerJython.class);
