@@ -81,8 +81,8 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
     }
     
     @Override
-    public ScriptContext<PythonInterpreter> createContext() {
-        return new JythonScriptContext();
+    public ScriptContext<PythonInterpreter> createContext(BaseEvent event) {
+        return new JythonScriptContext(event);
     }
     
     public BaseWrappedException<?> wrapTraceback(PyTraceback traceback) {

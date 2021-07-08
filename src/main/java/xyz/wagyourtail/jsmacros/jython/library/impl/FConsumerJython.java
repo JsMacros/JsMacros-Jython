@@ -6,11 +6,14 @@ import xyz.wagyourtail.jsmacros.client.JsMacros;
 import xyz.wagyourtail.jsmacros.core.Core;
 import xyz.wagyourtail.jsmacros.core.MethodWrapper;
 import xyz.wagyourtail.jsmacros.core.language.BaseLanguage;
+import xyz.wagyourtail.jsmacros.core.language.ContextContainer;
 import xyz.wagyourtail.jsmacros.core.library.IFWrapper;
 import xyz.wagyourtail.jsmacros.core.library.Library;
 import xyz.wagyourtail.jsmacros.core.library.PerLanguageLibrary;
 import xyz.wagyourtail.jsmacros.jython.language.impl.JythonLanguageDescription;
 import xyz.wagyourtail.jsmacros.jython.language.impl.JythonScriptContext;
+
+import java.util.concurrent.Semaphore;
 
 @Library(value = "JavaWrapper", languages = JythonLanguageDescription.class)
 public class FConsumerJython extends PerLanguageLibrary implements IFWrapper<PyFunction> {
@@ -151,5 +154,104 @@ public class FConsumerJython extends PerLanguageLibrary implements IFWrapper<PyF
     public void stop() {
         Core.instance.threadContext.get(Thread.currentThread()).closeContext();
     }
-    
+
+    private static class JythonMethodWrapper<T, U, R> extends MethodWrapper<T, U, R> {
+        private final PyFunction fn;
+        private final boolean await;
+        private final JythonScriptContext ctx;
+
+        private JythonMethodWrapper(PyFunction fn, boolean await, JythonScriptContext ctx) {
+            this.fn = fn;
+            this.await = await;
+            this.ctx = ctx;
+        }
+
+
+        private Object internal_accept(boolean await, Object... params) {
+
+            // if in the same lua context and not async...
+            if (Core.instance.threadContext.get(Thread.currentThread()) == ctx && await) {
+                return fn._jcall(params).__tojava__(Object.class);
+            }
+
+            Object[] retval = {null};
+            Throwable[] error = {null};
+            Semaphore lock = new Semaphore(0);
+
+            Thread t = new Thread(() -> {
+                Core.instance.threadContext.put(Thread.currentThread(), ctx);
+                try {
+                    retval[0] = fn._jcall(params).__tojava__(Object.class);
+                } catch (Throwable ex) {
+                    if (!await) {
+                        Core.instance.profile.logError(ex);
+                    }
+                    error[0] = ex;
+                } finally {
+                    ContextContainer<?> cc = Core.instance.eventContexts.get(Thread.currentThread());
+                    if (cc != null) cc.releaseLock();
+
+                    lock.release();
+                }
+            });
+            t.start();
+
+            if (await) {
+                try {
+                    lock.acquire();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (error[0] != null) throw new RuntimeException(error[0]);
+            }
+            return retval[0];
+        }
+
+        @Override
+        public void accept(T t) {
+            internal_accept(await, t);
+        }
+
+        @Override
+        public void accept(T t, U u) {
+            internal_accept(await, t, u);
+        }
+
+        @Override
+        public R apply(T t) {
+            return (R) internal_accept(true, t);
+        }
+
+        @Override
+        public R apply(T t, U u) {
+            return (R) internal_accept(true, t, u);
+        }
+
+        @Override
+        public boolean test(T t) {
+            return (boolean) internal_accept(true, t);
+        }
+
+        @Override
+        public boolean test(T t, U u) {
+            return (boolean) internal_accept(true, t, u);
+        }
+
+        @Override
+        public void run() {
+            internal_accept(await);
+        }
+
+        @Override
+        public int compare(T o1, T o2) {
+            return (int) internal_accept(true, o1, o2);
+        }
+
+        @Override
+        public R get() {
+            return (R) internal_accept(true);
+        }
+
+    }
+
 }
