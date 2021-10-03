@@ -5,7 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.python.util.PythonInterpreter;
 import xyz.wagyourtail.jsmacros.client.JsMacros;
 import xyz.wagyourtail.jsmacros.jython.language.impl.JythonLanguageDescription;
-import xyz.wagyourtail.jsmacros.jython.library.impl.FConsumerJython;
+import xyz.wagyourtail.jsmacros.jython.library.impl.FWrapper;
 
 public class JsMacrosJython implements ClientModInitializer {
     public static boolean hasJEP = false;
@@ -15,8 +15,7 @@ public class JsMacrosJython implements ClientModInitializer {
         hasJEP = FabricLoader.getInstance().isModLoaded("jsmacros-jep");
         
         JsMacros.core.addLanguage(new JythonLanguageDescription(hasJEP ? "jython.py" : ".py", JsMacros.core));
-        JsMacros.core.sortLanguages();
-        JsMacros.core.libraryRegistry.addLibrary(FConsumerJython.class);
+        JsMacros.core.libraryRegistry.addLibrary(FWrapper.class);
         
         
         // pre-init

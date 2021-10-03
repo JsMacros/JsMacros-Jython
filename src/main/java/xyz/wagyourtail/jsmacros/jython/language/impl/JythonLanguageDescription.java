@@ -7,13 +7,10 @@ import xyz.wagyourtail.jsmacros.core.config.ScriptTrigger;
 import xyz.wagyourtail.jsmacros.core.event.BaseEvent;
 import xyz.wagyourtail.jsmacros.core.language.BaseLanguage;
 import xyz.wagyourtail.jsmacros.core.language.BaseWrappedException;
-import xyz.wagyourtail.jsmacros.core.language.ContextContainer;
-import xyz.wagyourtail.jsmacros.core.language.ScriptContext;
+import xyz.wagyourtail.jsmacros.core.language.EventContainer;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
 
@@ -21,30 +18,30 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
         super(extension, runner);
     }
     
-    protected void execContext(ContextContainer<PythonInterpreter> ctx, Executor exec) throws Exception {
+    protected void execContext(EventContainer<PythonInterpreter> ctx, Executor exec) throws Exception {
         try (PythonInterpreter interp = new PythonInterpreter()) {
             ctx.getCtx().setContext(interp);
-            retrieveLibs(ctx).forEach(interp::set);
+            retrieveLibs(ctx.getCtx()).forEach(interp::set);
             
             exec.accept(interp);
         }
     }
     
     @Override
-    protected void exec(ContextContainer<PythonInterpreter> ctx, ScriptTrigger scriptTrigger, File file, BaseEvent baseEvent) throws Exception {
+    protected void exec(EventContainer<PythonInterpreter> ctx, ScriptTrigger scriptTrigger, BaseEvent baseEvent) throws Exception {
         execContext(ctx, (interp) -> {
             interp.set("event", baseEvent);
-            interp.set("file", file);
+            interp.set("file", ctx.getCtx().getFile());
             interp.set("context", ctx);
         
             interp.exec("import os\nos.chdir('"
-                + file.getParentFile().getCanonicalPath().replaceAll("\\\\", "/") + "')");
-            interp.execfile(file.getCanonicalPath());
+                + ctx.getCtx().getFile().getParentFile().getCanonicalPath().replaceAll("\\\\", "/") + "')");
+            interp.execfile(ctx.getCtx().getFile().getCanonicalPath());
         });
     }
     
     @Override
-    public void exec(ContextContainer<PythonInterpreter> ctx, String script, Map<String, Object> globals, Path path) throws Exception {
+    public void exec(EventContainer<PythonInterpreter> ctx, String script, Map<String, Object> globals) throws Exception {
         execContext(ctx, (interp) -> {
             globals.forEach(interp::set);
             interp.set("context", ctx);
@@ -81,8 +78,8 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
     }
     
     @Override
-    public ScriptContext<PythonInterpreter> createContext(BaseEvent event) {
-        return new JythonScriptContext(event);
+    public JythonScriptContext createContext(BaseEvent event, File file) {
+        return new JythonScriptContext(event, file);
     }
     
     public BaseWrappedException<?> wrapTraceback(PyTraceback traceback) {

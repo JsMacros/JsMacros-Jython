@@ -2,29 +2,22 @@ package xyz.wagyourtail.jsmacros.jython.language.impl;
 
 import org.python.util.PythonInterpreter;
 import xyz.wagyourtail.jsmacros.core.event.BaseEvent;
-import xyz.wagyourtail.jsmacros.core.language.ScriptContext;
+import xyz.wagyourtail.jsmacros.core.language.BaseScriptContext;
 
-public class JythonScriptContext extends ScriptContext<PythonInterpreter> {
-    boolean closed = false;
+import java.io.File;
 
-    public JythonScriptContext(BaseEvent event) {
-        super(event);
-    }
-
-    @Override
-    public boolean isContextClosed() {
-        return super.isContextClosed() || closed;
+public class JythonScriptContext extends BaseScriptContext<PythonInterpreter> {
+    public JythonScriptContext(BaseEvent event, File file) {
+        super(event, file);
     }
     
     @Override
     public void closeContext() {
-        if (context != null) {
-            PythonInterpreter ctx = context.get();
-            if (ctx != null) {
-                ctx.close();
-                closed = true;
-            }
+    super.closeContext();
+    PythonInterpreter ctx = context;
+        if (ctx != null) {
+            ctx.close();
         }
     }
-    
+
 }
