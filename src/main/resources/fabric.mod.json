@@ -17,7 +17,7 @@
 
   "environment": "*",
   "entrypoints": {
-    "client": [
+    "main": [
       "xyz.wagyourtail.jsmacros.jython.client.JsMacrosJython"
     ]
   },
