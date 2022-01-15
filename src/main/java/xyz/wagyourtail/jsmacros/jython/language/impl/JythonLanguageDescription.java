@@ -17,9 +17,15 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
     public JythonLanguageDescription(String extension, Core runner) {
         super(extension, runner);
     }
-    
+
+    public static PythonInterpreter createInterp(File folder) {
+        PySystemState sys = new PySystemState();
+        sys.path.append(Py.newString(folder.getAbsolutePath()));
+        return new PythonInterpreter(null, sys);
+    }
+
     protected void execContext(EventContainer<PythonInterpreter> ctx, Executor exec) throws Exception {
-        try (PythonInterpreter interp = new PythonInterpreter()) {
+        try (PythonInterpreter interp = createInterp(ctx.getCtx().getContainedFolder())) {
             ctx.getCtx().setContext(interp);
             retrieveLibs(ctx.getCtx()).forEach(interp::set);
             
@@ -33,9 +39,7 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
             interp.set("event", baseEvent);
             interp.set("file", ctx.getCtx().getFile());
             interp.set("context", ctx);
-        
-            interp.exec("import os\nos.chdir('"
-                + ctx.getCtx().getFile().getParentFile().getCanonicalPath().replaceAll("\\\\", "/") + "')");
+
             interp.execfile(ctx.getCtx().getFile().getCanonicalPath());
         });
     }

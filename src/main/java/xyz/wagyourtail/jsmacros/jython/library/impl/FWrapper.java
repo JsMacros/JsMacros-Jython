@@ -46,57 +46,48 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
         }
 
 
-        private Object internal_accept(boolean await, Object... params) {
+        private void internal_accept(boolean await, Object... params) {
 
-            // if in the same lua context and not async...
+            // if in the same jython context and not async...
             if (await) {
-                if (ctx.getBoundThreads().contains(Thread.currentThread())) {
-                    return fn._jcall(params).__tojava__(Object.class);
-                }
-
-                ctx.bindThread(Thread.currentThread());
+                internal_apply(params);
+                return;
             }
-
-            Object[] retval = {null};
-            Throwable[] error = {null};
-            Semaphore lock = new Semaphore(0);
-            boolean joinedThread = Core.instance.profile.checkJoinedThreadStack();
-
 
             Thread t = new Thread(() -> {
                 ctx.bindThread(Thread.currentThread());
                 try {
-                    if (await && joinedThread) {
-                        Core.instance.profile.joinedThreadStack.add(Thread.currentThread());
-                    }
-                    retval[0] = fn._jcall(params).__tojava__(Object.class);
+                    fn._jcall(params);
                 } catch (Throwable ex) {
-                    if (!await) {
-                        Core.instance.profile.logError(ex);
-                    }
-                    error[0] = ex;
+                    Core.instance.profile.logError(ex);
                 } finally {
-                    ctx.unbindThread(Thread.currentThread());
-                    Core.instance.profile.joinedThreadStack.remove(Thread.currentThread());
-
                     ctx.releaseBoundEventIfPresent(Thread.currentThread());
+                    ctx.unbindThread(Thread.currentThread());
 
-                    lock.release();
+                    Core.instance.profile.joinedThreadStack.remove(Thread.currentThread());
                 }
             });
             t.start();
+        }
 
-            if (await) {
-                try {
-                    lock.acquire();
-                    if (error[0] != null) throw new RuntimeException(error[0]);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                } finally {
-                    ctx.unbindThread(Thread.currentThread());
-                }
+        private Object internal_apply(Object... params) {
+            if (ctx.getBoundThreads().contains(Thread.currentThread())) {
+                return fn._jcall(params).__tojava__(Object.class);
             }
-            return retval[0];
+
+            try {
+                ctx.bindThread(Thread.currentThread());
+                if (Core.instance.profile.checkJoinedThreadStack()) {
+                    Core.instance.profile.joinedThreadStack.add(Thread.currentThread());
+                }
+                return fn._jcall(params).__tojava__(Object.class);
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
+            } finally {
+                ctx.releaseBoundEventIfPresent(Thread.currentThread());
+                ctx.unbindThread(Thread.currentThread());
+                Core.instance.profile.joinedThreadStack.remove(Thread.currentThread());
+            }
         }
 
         @Override
@@ -111,22 +102,22 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
 
         @Override
         public R apply(T t) {
-            return (R) internal_accept(true, t);
+            return (R) internal_apply(t);
         }
 
         @Override
         public R apply(T t, U u) {
-            return (R) internal_accept(true, t, u);
+            return (R) internal_apply(t, u);
         }
 
         @Override
         public boolean test(T t) {
-            return (boolean) internal_accept(true, t);
+            return (boolean) internal_apply(t);
         }
 
         @Override
         public boolean test(T t, U u) {
-            return (boolean) internal_accept(true, t, u);
+            return (boolean) internal_apply(t, u);
         }
 
         @Override
@@ -136,12 +127,12 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
 
         @Override
         public int compare(T o1, T o2) {
-            return (int) internal_accept(true, o1, o2);
+            return (int) internal_apply(o1, o2);
         }
 
         @Override
         public R get() {
-            return (R) internal_accept(true);
+            return (R) internal_apply();
         }
 
     }
