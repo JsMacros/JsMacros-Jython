@@ -43,13 +43,14 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
             interp.execfile(ctx.getCtx().getFile().getCanonicalPath());
         });
     }
-    
+
     @Override
-    public void exec(EventContainer<PythonInterpreter> ctx, String script, Map<String, Object> globals) throws Exception {
+    protected void exec(EventContainer<PythonInterpreter> ctx, String script, BaseEvent event) throws Exception {
         execContext(ctx, (interp) -> {
-            globals.forEach(interp::set);
+            interp.set("event", event);
+            interp.set("file", ctx.getCtx().getFile());
             interp.set("context", ctx);
-            
+
             interp.exec(script);
         });
     }

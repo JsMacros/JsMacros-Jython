@@ -59,12 +59,12 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
                 try {
                     fn._jcall(params);
                 } catch (Throwable ex) {
-                    Core.instance.profile.logError(ex);
+                    Core.getInstance().profile.logError(ex);
                 } finally {
                     ctx.releaseBoundEventIfPresent(Thread.currentThread());
                     ctx.unbindThread(Thread.currentThread());
 
-                    Core.instance.profile.joinedThreadStack.remove(Thread.currentThread());
+                    Core.getInstance().profile.joinedThreadStack.remove(Thread.currentThread());
                 }
             });
             t.start();
@@ -77,8 +77,8 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
 
             try {
                 ctx.bindThread(Thread.currentThread());
-                if (Core.instance.profile.checkJoinedThreadStack()) {
-                    Core.instance.profile.joinedThreadStack.add(Thread.currentThread());
+                if (Core.getInstance().profile.checkJoinedThreadStack()) {
+                    Core.getInstance().profile.joinedThreadStack.add(Thread.currentThread());
                 }
                 return fn._jcall(params).__tojava__(Object.class);
             } catch (Throwable ex) {
@@ -86,7 +86,7 @@ public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implemen
             } finally {
                 ctx.releaseBoundEventIfPresent(Thread.currentThread());
                 ctx.unbindThread(Thread.currentThread());
-                Core.instance.profile.joinedThreadStack.remove(Thread.currentThread());
+                Core.getInstance().profile.joinedThreadStack.remove(Thread.currentThread());
             }
         }
 
