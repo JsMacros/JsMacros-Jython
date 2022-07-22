@@ -20,7 +20,7 @@ public class JythonLanguageDescription extends BaseLanguage<PythonInterpreter> {
 
     public static PythonInterpreter createInterp(File folder) {
         PySystemState sys = new PySystemState();
-        sys.path.append(Py.newString(folder.getAbsolutePath()));
+        sys.path.append(Py.newStringOrUnicode(folder.getAbsolutePath()));
         return new PythonInterpreter(null, sys);
     }
 
