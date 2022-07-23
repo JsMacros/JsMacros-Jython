@@ -10,13 +10,14 @@ import xyz.wagyourtail.jsmacros.core.library.IFWrapper;
 import xyz.wagyourtail.jsmacros.core.library.Library;
 import xyz.wagyourtail.jsmacros.core.library.PerExecLanguageLibrary;
 import xyz.wagyourtail.jsmacros.jython.language.impl.JythonLanguageDescription;
+import xyz.wagyourtail.jsmacros.jython.language.impl.JythonScriptContext;
 
 import java.util.concurrent.Semaphore;
 
 @Library(value = "JavaWrapper", languages = JythonLanguageDescription.class)
-public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter> implements IFWrapper<PyFunction> {
+public class FWrapper extends PerExecLanguageLibrary<PythonInterpreter, JythonScriptContext> implements IFWrapper<PyFunction> {
     
-    public FWrapper(BaseScriptContext<PythonInterpreter> ctx, Class<BaseLanguage<PythonInterpreter>> language) {
+    public FWrapper(JythonScriptContext ctx, Class<JythonLanguageDescription> language) {
         super(ctx, language);
     }
     

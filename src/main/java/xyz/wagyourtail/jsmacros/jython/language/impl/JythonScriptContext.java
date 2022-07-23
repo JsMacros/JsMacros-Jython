@@ -20,4 +20,9 @@ public class JythonScriptContext extends BaseScriptContext<PythonInterpreter> {
         }
     }
 
+    @Override
+    public boolean isMultiThreaded() {
+        return true;
+    }
+
 }
